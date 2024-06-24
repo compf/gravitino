@@ -39,23 +39,16 @@ public class CatalogEntity implements Entity, Auditable, HasIdentifier {
   public static final Field AUDIT_INFO =
       Field.required("audit_info", AuditInfo.class, "The audit details of the catalog");
 
-  private Long id;
-
-  private String name;
-
-  @Getter private Catalog.Type type;
+    @Getter private Catalog.Type type;
 
   @Getter private String provider;
 
-  @Nullable @Getter private String comment;
-
-  @Nullable @Getter private Map<String, String> properties;
-
-  private AuditInfo auditInfo;
+    private AuditInfo auditInfo;
 
   private Namespace namespace;
+    private EntityMetadata entityMetadata = new EntityMetadata(null, null, null, null);
 
-  /**
+    /**
    * A map of fields and their corresponding values.
    *
    * @return An unmodifiable map containing the entity's fields and values.
@@ -63,12 +56,12 @@ public class CatalogEntity implements Entity, Auditable, HasIdentifier {
   @Override
   public Map<Field, Object> fields() {
     Map<Field, Object> fields = new HashMap<>();
-    fields.put(ID, id);
-    fields.put(NAME, name);
-    fields.put(COMMENT, comment);
+    fields.put(ID, entityMetadata.getId());
+    fields.put(NAME, entityMetadata.getName());
+    fields.put(COMMENT, entityMetadata.getComment());
     fields.put(TYPE, type);
     fields.put(PROVIDER, provider);
-    fields.put(PROPERTIES, properties);
+    fields.put(PROPERTIES, entityMetadata.getProperties());
     fields.put(AUDIT_INFO, auditInfo);
 
     return Collections.unmodifiableMap(fields);
@@ -91,12 +84,12 @@ public class CatalogEntity implements Entity, Auditable, HasIdentifier {
    */
   @Override
   public String name() {
-    return name;
+    return entityMetadata.getName();
   }
 
   @Override
   public Long id() {
-    return id;
+    return entityMetadata.getId();
   }
 
   /**
@@ -121,15 +114,15 @@ public class CatalogEntity implements Entity, Auditable, HasIdentifier {
 
   /** Convert the catalog entity to a {@link CatalogInfo} instance. */
   public CatalogInfo toCatalogInfo() {
-    return new CatalogInfo(id, name, type, provider, comment, properties, auditInfo, namespace);
+    return new CatalogInfo(entityMetadata.getId(), entityMetadata.getName(), type, provider, entityMetadata.getComment(), entityMetadata.getProperties(), auditInfo, namespace);
   }
 
   public CatalogInfo toCatalogInfoWithoutHiddenProps(Set<String> hiddenKeys) {
     Map<String, String> filteredProperties =
-        properties == null ? new HashMap<>() : new HashMap<>(properties);
+        entityMetadata.getProperties() == null ? new HashMap<>() : new HashMap<>(entityMetadata.getProperties());
     filteredProperties.keySet().removeAll(hiddenKeys);
     return new CatalogInfo(
-        id, name, type, provider, comment, filteredProperties, auditInfo, namespace);
+            entityMetadata.getId(), entityMetadata.getName(), type, provider, entityMetadata.getComment(), filteredProperties, auditInfo, namespace);
   }
 
   /** Builder class for creating instances of {@link CatalogEntity}. */
@@ -149,7 +142,7 @@ public class CatalogEntity implements Entity, Auditable, HasIdentifier {
      * @return the builder instance.
      */
     public Builder withId(Long id) {
-      catalog.id = id;
+      catalog.entityMetadata.setId(id);
       return this;
     }
 
@@ -160,7 +153,7 @@ public class CatalogEntity implements Entity, Auditable, HasIdentifier {
      * @return the builder instance.
      */
     public Builder withName(String name) {
-      catalog.name = name;
+      catalog.entityMetadata.setName(name);
       return this;
     }
 
@@ -204,7 +197,7 @@ public class CatalogEntity implements Entity, Auditable, HasIdentifier {
      * @return the builder instance.
      */
     public Builder withComment(String comment) {
-      catalog.comment = comment;
+      catalog.entityMetadata.setComment(comment);
       return this;
     }
 
@@ -215,7 +208,7 @@ public class CatalogEntity implements Entity, Auditable, HasIdentifier {
      * @return the builder instance.
      */
     public Builder withProperties(Map<String, String> properties) {
-      catalog.properties = properties;
+      catalog.entityMetadata.setProperties(properties);
       return this;
     }
 
@@ -257,13 +250,13 @@ public class CatalogEntity implements Entity, Auditable, HasIdentifier {
       return false;
     }
     CatalogEntity that = (CatalogEntity) o;
-    return Objects.equal(id, that.id)
-        && Objects.equal(name, that.name)
+    return Objects.equal(entityMetadata.getId(), that.entityMetadata.getId())
+        && Objects.equal(entityMetadata.getName(), that.entityMetadata.getName())
         && Objects.equal(namespace, that.namespace)
         && type == that.type
         && Objects.equal(provider, that.provider)
-        && Objects.equal(comment, that.comment)
-        && Objects.equal(properties, that.properties)
+        && Objects.equal(entityMetadata.getComment(), that.entityMetadata.getComment())
+        && Objects.equal(entityMetadata.getProperties(), that.entityMetadata.getProperties())
         && Objects.equal(auditInfo, that.auditInfo);
   }
 
@@ -274,7 +267,7 @@ public class CatalogEntity implements Entity, Auditable, HasIdentifier {
    */
   @Override
   public int hashCode() {
-    return Objects.hashCode(id, name, type, provider, comment, properties, auditInfo);
+    return Objects.hashCode(entityMetadata.getId(), entityMetadata.getName(), type, provider, entityMetadata.getComment(), entityMetadata.getProperties(), auditInfo);
   }
 
   public static Builder builder() {
